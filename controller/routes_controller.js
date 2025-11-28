@@ -43,7 +43,7 @@ async function createLink(req,res){
           .json({ duplicate: `code alredy exist` });
 
     } catch (err) {
-      console.log("error during finding for duplicate => ", err);
+      console.log(`error during finding for duplicate => ${err}`);
       return res
         .status(400)
         .json({ error: "error during finding for duplicate" });
@@ -61,7 +61,7 @@ async function createLink(req,res){
         console.log("saved entry")
     }
     catch(err){
-        console.log("err at saving entry in db  ==> ",err)
+        console.log(`err at saving entry in db  ==> ${err}` );
         return res.status(400).json({ err: "err at saving entry in db" });
     }
 
@@ -89,7 +89,11 @@ async function redirectToRealUrl(req,res){
         return res.redirect(302, data.url);
     }
     catch(err){
-        return res.status(500).json({error:"Something went wrong while finding ==> ",err})
+        return res
+          .status(500)
+          .json({
+            error: `Something went wrong while finding ==> ${err}` 
+          });
     }
 
 }
@@ -102,7 +106,7 @@ async function listAllLinks(req,res){
     }
     catch(err){
         console.log("error during fetching all data");
-        return res.status(400).json({error:"err during fetching all data  =>  ",err})
+        return res.status(400).json({error:`err during fetching all data  =>  ${err}`})
     }
 
 }
@@ -119,8 +123,10 @@ async function statsForOneCode(req,res){
         return res.status(200).json(data)
     }
     catch(err){
-        console.log("error during findnig in db => ",err)
-        return res.status(500).json({error:"error during findnig in db => ",err})
+        console.log(`error during findnig in db =>  ${err}` );
+        return res
+          .status(500)
+          .json({ error: `error during findnig in db => ${err}` });
     }
 
 }
@@ -134,7 +140,9 @@ async function deleteCode(req,res){
         return res.status(200).json({message:"code deleted"})
     }
     catch(err){
-        console.log("error during finding or deleting in db func(deleteCode) => ",err);
+        console.log(
+          `error during finding or deleting in db func(deleteCode) => ${err} `
+        );
         return res
           .status(500)
           .json({
