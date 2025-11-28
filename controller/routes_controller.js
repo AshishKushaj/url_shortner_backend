@@ -1,19 +1,42 @@
 const {model} = require('../model/models')
-const { customAlphabet } = require("nanoid");
 
-const nanoid = customAlphabet(
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-  8
-);
+
+function generateCode(length = 8) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    const idx = Math.floor(Math.random() * chars.length);
+    result += chars[idx];
+  }
+  return result;
+}
+
 
 async function createLink(req,res){
     const body=req.body;
     if(!body.url)
         return res.status(400).json({err:"no url sent in body"}) 
     
-    
+    const code=body.code;
+     let shortCode;
+
+     if (code) {
+       const valid = /^[A-Za-z0-9]{6,8}$/.test(code);
+       if (!valid) {
+         return res
+           .status(400)
+           .json({ error: "code must match [A-Za-z0-9]{6,8}" });
+       }
+       shortCode = code;
+     } else {
+       shortCode = generateCode(8); 
+     }
+
+
+
     try {
-      const duplicate = await model.findOne({ shortUrl: body.code });
+      const duplicate = await model.findOne({ shortUrl: shortCode });
       if (duplicate)
         return res
           .status(409)
@@ -27,11 +50,9 @@ async function createLink(req,res){
     }
 
 
-    const id=nanoid();
-
     const entry = new model({
-        url:body.url,
-        shortUrl:id
+      url: body.url,
+      shortUrl: shortCode,
     });
 
 
@@ -44,14 +65,14 @@ async function createLink(req,res){
         return res.status(400).json({ err: "err at saving entry in db" });
     }
 
-    return res.status(200).json({shortUrl:id})
+    return res.status(200).json({ shortUrl: shortCode });
 }
 
 
 async function redirectToRealUrl(req,res){
     const id = req.params.code;
 
-    if (!req.params.id)
+    if (!id)
       return res.status(400).json({ err: "no link provided" });
 
     try{
